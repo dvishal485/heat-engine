@@ -299,7 +299,7 @@ class TherodynamicProcess:
             beta = TherodynamicProcess.assign(StateVariable(), b, False)
             TherodynamicProcess.assign(a, alpha)
             TherodynamicProcess.assign(b, beta)
-            w = integrate(self.relation, a.volume, b.volume)[0]
+            w = -integrate(self.relation, a.volume, b.volume)[0]
             u = TherodynamicProcess.changeInInternalEnergy(a, b)
             return {
                 'u': u, 'w': w, 'q': u - w
