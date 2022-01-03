@@ -12,6 +12,7 @@ Cp = Cv + R
 
 class StateVariable:
     def __init__(self, pressure: float = None, volume: float = None, temperature: float = None) -> None:
+        '''Represents a thermodynamic coordinate'''
         if pressure == None and volume != None and temperature != None:
             pressure = n * R * temperature / volume
         if pressure != None and volume == None and temperature != None:
@@ -45,6 +46,15 @@ class TherodynamicProcess:
 
     class IsothermalReversible:
         def __init__(self, a: StateVariable, b: StateVariable):
+            '''
+            PV = `constant`
+            ---
+            Treats the given states as an isothermal process
+            ---
+            Parameters
+            - `a` : Initial State
+            - `b` : Final State
+            '''
             TherodynamicProcess.assign(
                 a, StateVariable(temperature=b.temperature))
             TherodynamicProcess.assign(
@@ -117,6 +127,7 @@ class TherodynamicProcess:
             }
 
         def coordinates(self):
+            '''Returns array of `pressure`, `volume` and `temperature` relating to the process'''
             ll = np.min([self.a.volume, self.b.volume])
             l = np.max([self.a.volume, self.b.volume])
             volumes = np.linspace(ll, l, 100)
@@ -139,6 +150,14 @@ class TherodynamicProcess:
         def __init__(self, a: StateVariable, b: StateVariable, gamma: float = gamma, k: float = None):
             '''	
             PV^&#120574; = constant
+            ---
+            Treats the given states as an adiabatic process
+            ---
+            Parameters
+            - `a` : Initial State
+            - `b` : Final State
+            - `gamma` : Ratio of heat capacities of the given gas
+            - `k` : The value of `constant` in the expression
             '''
             vars = [a, b]
             # PV^gamma = constant (say k)
@@ -195,6 +214,7 @@ class TherodynamicProcess:
             return StateVariable(pressure=pressure, volume=(self.k/pressure)**(1/self.gamma))
 
         def stats(self):
+            '''Returns certains quantities related to the process'''
             u = TherodynamicProcess.changeInInternalEnergy(self.a, self.b)
             try:
                 if self.a.temperature != None and self.b.temperature != None:
@@ -222,6 +242,7 @@ class TherodynamicProcess:
             }
 
         def coordinates(self):
+            '''Returns array of `pressure`, `volume` and `temperature` relating to the process'''
             ll = np.min([self.a.volume, self.b.volume])
             l = np.max([self.a.volume, self.b.volume])
             volumes = np.linspace(ll, l, 100)
@@ -239,12 +260,13 @@ class TherodynamicProcess:
     class PolyIsotropicProcess:
         def __init__(self, a: StateVariable, b: StateVariable, y: float, k: float = None):
             '''
-            Process satisfying `PV^y = constant`
+            Process satisfying `PV^x = constant`
             ---
             Parameters
             - `a` : Initial `StateVariable`
             - `b` : Final `StateVariable`
-            - `y` : Value of power of Volume in the expression `PV^y = constant`
+            - `x` : Value of power of Volume in the expression `PV^x = constant`
+            - `k` : The value of `constant` in the expression
             '''
             process = TherodynamicProcess.AdiabaticReversible(
                 a, b, gamma=y, k=k)
@@ -255,15 +277,19 @@ class TherodynamicProcess:
             self.y = y
 
         def getStateViaVolume(self, volume: float):
+            '''Returns state for polyisotropic process for a given volume'''
             return self.process.getStateViaVolume(volume)
 
         def getStateViaPressure(self, pressure: float):
+            '''Returns state for polyisotropic process for a given pressure'''
             return self.process.getStateViaPressure(pressure)
 
         def stats(self):
+            '''Returns certains quantities related to the process'''
             return self.process.stats()
 
         def coordinates(self):
+            '''Returns array of `pressure`, `volume` and `temperature` relating to the process'''
             ll = np.min([self.a.volume, self.b.volume])
             l = np.max([self.a.volume, self.b.volume])
             volumes = np.linspace(ll, l, 100)
@@ -290,9 +316,11 @@ class TherodynamicProcess:
             self.relation = relation
 
         def getStateViaVolume(self, volume: float):
+            '''Returns state for given process for a given volume'''
             return StateVariable(pressure=self.relation(volume), volume=volume)
 
         def stats(self, a: StateVariable, b: StateVariable):
+            '''Returns certains quantities related to the process between the given two states'''
             a.pressure = self.relation(a.volume)
             b.pressure = self.relation(b.volume)
             alpha = TherodynamicProcess.assign(StateVariable(), a, False)
@@ -306,6 +334,7 @@ class TherodynamicProcess:
             }
 
         def coordinates(self, a: StateVariable, b: StateVariable):
+            '''Returns array of `pressure`, `volume` and `temperature` relating to the process between given states'''
             ll = np.min([a.volume, b.volume])
             l = np.max([a.volume, b.volume])
             TherodynamicProcess.assign(a, StateVariable(
@@ -431,7 +460,7 @@ class TherodynamicProcess:
                         transparent=True,)
         return {'u': u, 'w': w, 'q': q, 'e': efficiency}
 
-    def plot(pvt: dict):
+    def plot(pvt: dict, save_name: str = None):
         '''Plots a P-V and V-T curve for given set of P, V, T Coordinates'''
         plt.style.use('seaborn')
         fig, ax = plt.subplots(figsize=(15, 5), ncols=2)
@@ -459,3 +488,66 @@ class TherodynamicProcess:
         ax[1].set_xlim(ax[1].get_xlim()[0], ax[1].get_xlim()[1]*1.05)
         ax[0].scatter([v[0], v[l]], [p[0], p[l]], c='red')
         ax[1].scatter([t[0], t[l]], [v[0], v[l]], c='red')
+        if save_name != None:
+            fig.savefig(f'{save_name}.png',
+                        bbox_inches='tight',
+                        transparent=True,)
+
+    def plotCustomEngine(state_variables, processes, save_name: str = None):
+        '''
+        Plots the PV Curve for given set of state variables and processes
+        along with it's efficiency, work done and other statistics.
+        '''
+        cx = 0
+        plt.style.use('seaborn')
+        while(cx < len(processes)+1):
+            cx = cx+1
+            for n, i in enumerate(processes):
+                try:
+                    try:
+                        pvt = i().coordinates(
+                            state_variables[n], state_variables[n+1])
+                    except:
+                        pvt = i().coordinates()
+                    plt.plot(pvt['v'], pvt['p'])
+                except:
+                    None
+        work = []
+        energy = []
+        heat = []
+        for n, i in enumerate(processes):
+            try:
+                s = i().stats(state_variables[n], state_variables[n+1])
+            except:
+                s = i().stats()
+            work.append(s['w'])
+            energy.append(s['u'])
+            heat.append(s['q'])
+        plt.xlabel('Volume')
+        plt.ylabel('Pressure')
+        w = np.array(work).sum()
+        heat = np.array(heat)
+        efficiency = -w/np.array((heat[heat > 0])).sum()
+        u = np.array(energy).sum()
+        q = np.array(heat).sum()
+        names = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+        vg = []
+        pg = []
+        tg = []
+        for n, i in enumerate(state_variables):
+            plt.annotate(
+                f"{names[n]} ({i.pressure:.1f},\n    {i.volume:.1f}, {i.temperature:.1f})", (i.volume, i.pressure + (plt.ylim()[1]-plt.ylim()[0])/100*5), backgroundcolor="w")
+            vg.append(i.volume)
+            pg.append(i.pressure)
+            tg.append(i.temperature)
+        plt.ylim(plt.ylim()[0], plt.ylim()[1]*1.1)
+        plt.xlim(plt.xlim()[0], plt.xlim()[1]*1.08)
+        plt.scatter(vg, pg)
+        np.array([work, heat, energy])
+        plt.title(
+            f'\u0394U = {u:.1f} J, w = {w:.1f} J, q = {q:.1f} J\n\u03B7 = {"Negative (system is consuming energy)" if efficiency<0 else f"{efficiency*100:.2f}%"}')
+        if save_name != None:
+            plt.savefig(f'{save_name}.png',
+                        bbox_inches='tight',
+                        transparent=True,)
+        return {'u': u, 'w': w, 'q': q, 'e': efficiency}
