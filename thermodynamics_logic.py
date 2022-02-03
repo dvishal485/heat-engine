@@ -258,16 +258,18 @@ class TherodynamicProcess:
             return {'p': p, 'v': v, 't': t}
 
     class PolyIsotropicProcess:
-        def __init__(self, a: StateVariable, b: StateVariable, y: float, k: float = None):
+        def __init__(self, a: StateVariable, b: StateVariable, y: float=None, k: float = None):
             '''
-            Process satisfying `PV^x = constant`
+            Process satisfying `PV^y = constant`
             ---
             Parameters
             - `a` : Initial `StateVariable`
             - `b` : Final `StateVariable`
-            - `x` : Value of power of Volume in the expression `PV^x = constant`
+            - `y` : Value of power of Volume in the expression `PV^x = constant`
             - `k` : The value of `constant` in the expression
             '''
+            if y == None:
+                y = np.log(b.pressure/a.pressure)/np.log(a.volume/b.volume)
             process = TherodynamicProcess.AdiabaticReversible(
                 a, b, gamma=y, k=k)
             self.process = process
@@ -505,8 +507,11 @@ class TherodynamicProcess:
             for n, i in enumerate(processes):
                 try:
                     try:
+                        if(n+1 == len(processes)):
+                            f = 0
+                        else: f = n+1
                         pvt = i().coordinates(
-                            state_variables[n], state_variables[n+1])
+                            state_variables[n], state_variables[f])
                     except:
                         pvt = i().coordinates()
                     plt.plot(pvt['v'], pvt['p'])
@@ -517,7 +522,10 @@ class TherodynamicProcess:
         heat = []
         for n, i in enumerate(processes):
             try:
-                s = i().stats(state_variables[n], state_variables[n+1])
+                if(n+1 == len(processes)):
+                    f = 0
+                else: f = n+1
+                s = i().stats(state_variables[n], state_variables[f])
             except:
                 s = i().stats()
             work.append(s['w'])
