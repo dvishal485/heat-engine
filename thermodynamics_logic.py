@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import quad as integrate
 
+INFINITY = 10 ** 8
 n = 1
 R = 8.314
 gamma = 5/3
@@ -307,7 +308,7 @@ class TherodynamicProcess:
             return {'p': p, 'v': v, 't': t}
 
     class DefineRulePV:
-        def __init__(self, relation) -> None:
+        def __init__(self, relation=None) -> None:
             '''
             Create a custom P-V relation
             ---
@@ -316,6 +317,19 @@ class TherodynamicProcess:
             the function should return value of pressure as a `float`
             '''
             self.relation = relation
+            self.error_message = True
+        def initialize_linear(self, a: StateVariable, b: StateVariable):
+            def custom_process(v:float):
+                if (b.volume==a.volume):
+                    m = INFINITY
+                    if self.error_message:
+                        print("NOTE : Isochoric Process can't be plotted as of now. Other functions will work just fine")
+                        self.error_message = False
+                else:
+                    m = (b.pressure-a.pressure)/(b.volume-a.volume)
+                p = a.pressure + m*(v-a.volume)
+                return p
+            self.relation = custom_process
 
         def getStateViaVolume(self, volume: float):
             '''Returns state for given process for a given volume'''
