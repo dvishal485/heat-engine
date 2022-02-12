@@ -46,7 +46,7 @@ class TherodynamicProcess:
             return StateVariable(P, V, T)
 
     class IsothermalReversible:
-        def __init__(self, a: StateVariable, b: StateVariable):
+        def __init__(self, a: StateVariable, b: StateVariable, k: float = None):
             '''
             PV = `constant`
             ---
@@ -60,18 +60,18 @@ class TherodynamicProcess:
                 a, StateVariable(temperature=b.temperature))
             TherodynamicProcess.assign(
                 b, StateVariable(temperature=a.temperature))
-            k = None
 
             vars = [a, b]
             # PV = constant (say k) = nRT
-            for i in vars:
-                try:
-                    k = i.pressure * i.volume
-                except:
+            if k == None:
+                for i in vars:
                     try:
-                        k = n * R * i.temperature
+                        k = i.pressure * i.volume
                     except:
-                        None
+                        try:
+                            k = n * R * i.temperature
+                        except:
+                            None
             if k == None:
                 raise ValueError(
                     "Not enough information provided to process isothermal process")
@@ -259,7 +259,7 @@ class TherodynamicProcess:
             return {'p': p, 'v': v, 't': t}
 
     class PolyIsotropicProcess:
-        def __init__(self, a: StateVariable, b: StateVariable, y: float=None, k: float = None):
+        def __init__(self, a: StateVariable, b: StateVariable, y: float = None, k: float = None):
             '''
             Process satisfying `PV^y = constant`
             ---
@@ -318,12 +318,14 @@ class TherodynamicProcess:
             '''
             self.relation = relation
             self.error_message = True
+
         def initialize_linear(self, a: StateVariable, b: StateVariable):
-            def custom_process(v:float):
-                if (b.volume==a.volume):
+            def custom_process(v: float):
+                if (b.volume == a.volume):
                     m = INFINITY
                     if self.error_message:
-                        print("NOTE : Isochoric Process can't be plotted as of now. Other functions will work just fine")
+                        print(
+                            "NOTE : Isochoric Process can't be plotted as of now. Other functions will work just fine")
                         self.error_message = False
                 else:
                     m = (b.pressure-a.pressure)/(b.volume-a.volume)
@@ -523,7 +525,8 @@ class TherodynamicProcess:
                     try:
                         if(n+1 == len(processes)):
                             f = 0
-                        else: f = n+1
+                        else:
+                            f = n+1
                         pvt = i().coordinates(
                             state_variables[n], state_variables[f])
                     except:
@@ -538,7 +541,8 @@ class TherodynamicProcess:
             try:
                 if(n+1 == len(processes)):
                     f = 0
-                else: f = n+1
+                else:
+                    f = n+1
                 s = i().stats(state_variables[n], state_variables[f])
             except:
                 s = i().stats()
