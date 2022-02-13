@@ -37,13 +37,14 @@ class TherodynamicProcess:
             V = value.volume
         if P == None:
             P = value.pressure
+        newState = StateVariable(P, V, T)
         if inplace:
-            variable.volume = V
-            variable.pressure = P
-            variable.temperature = T
+            variable.volume = newState.volume
+            variable.pressure = newState.pressure
+            variable.temperature = newState.temperature
             return variable
         else:
-            return StateVariable(P, V, T)
+            return newState
 
     class IsothermalReversible:
         def __init__(self, a: StateVariable, b: StateVariable, k: float = None):
@@ -108,11 +109,11 @@ class TherodynamicProcess:
             self.b: StateVariable = b
             self.k: float = k
 
-        def getStateViaVolume(self, volume: float):
+        def getStateViaVolume(self, volume: float) -> StateVariable:
             '''Returns state for isothermal process for a given volume'''
             return StateVariable(pressure=self.k/volume, volume=volume)
 
-        def getStateViaPressure(self, pressure: float):
+        def getStateViaPressure(self, pressure: float) -> StateVariable:
             '''Returns state for isothermal process for a given pressure'''
             return StateVariable(volume=self.k/pressure, pressure=pressure)
 
@@ -210,7 +211,7 @@ class TherodynamicProcess:
             '''Returns state for adiabatic process for a given volume'''
             return StateVariable(pressure=self.k/(volume**self.gamma), volume=volume)
 
-        def getStateViaPressure(self, pressure: float):
+        def getStateViaPressure(self, pressure: float) -> StateVariable:
             '''Returns state for adiabatic process for a given pressure'''
             return StateVariable(pressure=pressure, volume=(self.k/pressure)**(1/self.gamma))
 
@@ -279,11 +280,11 @@ class TherodynamicProcess:
             self.k = process.k
             self.y = y
 
-        def getStateViaVolume(self, volume: float):
+        def getStateViaVolume(self, volume: float) -> StateVariable:
             '''Returns state for polyisotropic process for a given volume'''
             return self.process.getStateViaVolume(volume)
 
-        def getStateViaPressure(self, pressure: float):
+        def getStateViaPressure(self, pressure: float) -> StateVariable:
             '''Returns state for polyisotropic process for a given pressure'''
             return self.process.getStateViaPressure(pressure)
 
@@ -325,7 +326,7 @@ class TherodynamicProcess:
                     m = INFINITY
                     if self.error_message:
                         print(
-                            "NOTE : Isochoric Process can't be plotted as of now. Other functions will work just fine")
+                            "NOTE : Use class IsochoricProcess instead of class DefineRulePV for isochoric processes")
                         self.error_message = False
                 else:
                     m = (b.pressure-a.pressure)/(b.volume-a.volume)
@@ -418,6 +419,66 @@ class TherodynamicProcess:
         def stats(self, a: StateVariable = None, b: StateVariable = None):
             '''Returns certains quantities related to the process between the given two states'''
             return self.relation.stats(a, b)
+
+    class IsochoricProcess:
+        def __init__(self, a: StateVariable, b: StateVariable, comman_volume: float = None) -> None:
+            if a.volume == None and b.volume != None:
+                TherodynamicProcess.assign(
+                    a, StateVariable(volume=b.volume))
+            if b.volume == None and a.volume != None:
+                TherodynamicProcess.assign(
+                    b, StateVariable(volume=a.volume))
+            if (a.volume == None or b.volume == None) and comman_volume != None:
+                TherodynamicProcess.assign(
+                    a, StateVariable(volume=comman_volume))
+                TherodynamicProcess.assign(
+                    b, StateVariable(volume=comman_volume))
+            if comman_volume == None:
+                comman_volume = a.volume
+            if not(a.volume == b.volume == comman_volume):
+                raise ArithmeticError('Volume information is not correct')
+            self.a = a
+            self.b = b
+            self.comman_volume = comman_volume
+
+        def stats(self, a: StateVariable = None, b: StateVariable = None):
+            '''Returns certains quantities related to the process'''
+            if a == None:
+                a = self.a
+            if b == None:
+                b = self.b
+            u = TherodynamicProcess.changeInInternalEnergy(a, b)
+            w = 0.0  # w = integration(-p(dV)) = 0 as dV = 0
+            return {
+                'u': u,
+                'w': w,
+                'q': u - w
+            }
+
+        def getStateViaPressure(self, pressure: float) -> StateVariable:
+            '''Returns state for isochoric process for a given pressure'''
+            return StateVariable(pressure=pressure, volume=self.comman_volume)
+
+        def coordinates(self, a: StateVariable = None, b: StateVariable = None):
+            '''Returns array of `pressure`, `volume` and `temperature` relating to the process between given states'''
+            if a == None:
+                a = self.a
+            if b == None:
+                b = self.b
+            ll = np.min([a.pressure, b.pressure])
+            l = np.max([a.pressure, b.pressure])
+            pressures = np.linspace(ll, l, 100)
+            p = []
+            v = []
+            t = []
+            comman_volume = self.comman_volume
+            for pressure in pressures:
+                state = StateVariable(pressure=pressure, volume=comman_volume)
+                if state.pressure != None:
+                    p.append(state.pressure)
+                    v.append(state.volume)
+                    t.append(state.temperature)
+            return {'p': p, 'v': v, 't': t}
 
     def carnotEnginePlot(a: StateVariable, b: StateVariable, c: StateVariable, d: StateVariable, plot: bool = True, save_name: str = None):
         '''
