@@ -149,7 +149,7 @@ class TherodynamicProcess:
 
     class AdiabaticReversible:
         def __init__(self, a: StateVariable, b: StateVariable, gamma: float = gamma, k: float = None):
-            '''	
+            '''
             PV^&#120574; = constant
             ---
             Treats the given states as an adiabatic process
@@ -332,13 +332,21 @@ class TherodynamicProcess:
                 p = a.pressure + m*(v-a.volume)
                 return p
             self.relation = custom_process
+            self.a = a
+            self.b = b
 
         def getStateViaVolume(self, volume: float):
             '''Returns state for given process for a given volume'''
             return StateVariable(pressure=self.relation(volume), volume=volume)
 
-        def stats(self, a: StateVariable, b: StateVariable):
+        def stats(self, a: StateVariable = None, b: StateVariable = None):
             '''Returns certains quantities related to the process between the given two states'''
+            if a == None:
+                a = self.a
+            if b == None:
+                b = self.b
+            if a == None or b == None:
+                raise ValueError('State information insufficient')
             a.pressure = self.relation(a.volume)
             b.pressure = self.relation(b.volume)
             alpha = TherodynamicProcess.assign(StateVariable(), a, False)
@@ -351,8 +359,14 @@ class TherodynamicProcess:
                 'u': u, 'w': w, 'q': u - w
             }
 
-        def coordinates(self, a: StateVariable, b: StateVariable):
+        def coordinates(self, a: StateVariable = None, b: StateVariable = None):
             '''Returns array of `pressure`, `volume` and `temperature` relating to the process between given states'''
+            if a == None:
+                a = self.a
+            if b == None:
+                b = self.b
+            if a == None or b == None:
+                raise ValueError('State information insufficient')
             ll = np.min([a.volume, b.volume])
             l = np.max([a.volume, b.volume])
             TherodynamicProcess.assign(a, StateVariable(
