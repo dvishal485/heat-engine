@@ -388,10 +388,12 @@ class TherodynamicProcess:
 
     class IsobaricProcess:
         def __init__(self, a: StateVariable, b: StateVariable, comman_pressure: float = None) -> None:
-            if a.pressure == None:
-                a.pressure = b.pressure
-            if b.pressure == None:
-                b.pressure = a.pressure
+            if a.pressure == None and b.pressure != None:
+                TherodynamicProcess.assign(
+                    a, StateVariable(pressure=b.pressure))
+            if b.pressure == None and a.pressure != None:
+                TherodynamicProcess.assign(
+                    b, StateVariable(pressure=a.pressure))
             if (a.pressure == None or b.pressure == None) and comman_pressure != None:
                 TherodynamicProcess.assign(
                     a, StateVariable(pressure=comman_pressure))
