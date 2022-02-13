@@ -581,6 +581,7 @@ class TherodynamicProcess:
                 f'\u0394U = {u:.2f} J, w = {w:.2f} J, q = {q:.2f} J\n\u03B7 = {efficiency*100:.2f}%')
             ax[1].legend()
             fig.tight_layout()
+            plt.show()
         if save_name != None and plot:
             fig.savefig(f'{save_name}.png',
                         bbox_inches='tight',
@@ -615,6 +616,7 @@ class TherodynamicProcess:
         ax[1].set_xlim(ax[1].get_xlim()[0], ax[1].get_xlim()[1]*1.05)
         ax[0].scatter([v[0], v[l]], [p[0], p[l]], c='red')
         ax[1].scatter([t[0], t[l]], [v[0], v[l]], c='red')
+        plt.show()
         if save_name != None:
             fig.savefig(f'{save_name}.png',
                         bbox_inches='tight',
@@ -681,6 +683,7 @@ class TherodynamicProcess:
         np.array([work, heat, energy])
         plt.title(
             f'\u0394U = {u:.1f} J, w = {w:.1f} J, q = {q:.1f} J\n\u03B7 = {"Negative (system is consuming energy)" if efficiency<0 else f"{efficiency*100:.2f}%"}')
+        plt.show()
         if save_name != None:
             plt.savefig(f'{save_name}.png',
                         bbox_inches='tight',
