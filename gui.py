@@ -35,24 +35,34 @@ def prcs(*args):
     dest.clear()
     asp = process.get()[0]
     if asp == 'I':
-        k = tk.Label(r, text='k')
-        k.grid(row=12, column=1)
-        k_entry.grid(row=12, column=2)
+        asp = process.get()[3]
+        if asp == 't':
+            k_widget = tk.Label(r, text='k')
+            k_widget.grid(row=12, column=1)
+            k_entry.grid(row=12, column=2)
+        if asp == 'b':
+            k_widget = tk.Label(r, text='Comman pressure')
+            k_widget.grid(row=12, column=1)
+            k_entry.grid(row=12, column=2)
+        if asp == 'c':
+            k_widget = tk.Label(r, text='Comman volume')
+            k_widget.grid(row=12, column=1)
+            k_entry.grid(row=12, column=2)
     elif asp == 'A':
         y = tk.Label(r, text='gamma')
         y.grid(row=11, column=1)
         y_entry.grid(row=11, column=2)
-        k = tk.Label(r, text='k')
-        k.grid(row=12, column=1)
+        k_widget = tk.Label(r, text='k')
+        k_widget.grid(row=12, column=1)
         k_entry.grid(row=12, column=2)
     elif asp == 'P':
         y = tk.Label(r, text='y')
         y.grid(row=11, column=1)
         y_entry.grid(row=11, column=2)
-        k = tk.Label(r, text='k')
-        k.grid(row=12, column=1)
+        k_widget = tk.Label(r, text='k')
+        k_widget.grid(row=12, column=1)
         k_entry.grid(row=12, column=2)
-    dest.append(k)
+    dest.append(k_widget)
     dest.append(k_entry)
     try:
         dest.append(y)
@@ -93,8 +103,8 @@ def submit():
     v = None if v == "" else float(v)*alpUnit[3]
     t = None if t == '' else (float(t)+273.15) if u2[2].get() == 'Celcius' else (
         float(t) if u2[2].get() == 'Kelvin' else (float(t)-32)*5/9+273.15)
-    k = k_entry.get()
-    k = None if k == '' else float(k)
+    k_val = k_entry.get()
+    k_val = None if k_val == '' else float(k_val)
     try:
         y = y_entry.get()
         y = None if k == '' else float(y)
@@ -104,13 +114,25 @@ def submit():
     p = process.get()[0]
     clear()
     if p == 'I':
-        pr = TherodynamicProcess.IsothermalReversible(a, b)
-        k_entry.insert(0, pr.k)
+        p = process.get()[3]
+        if p == 't':
+            pr = TherodynamicProcess.IsothermalReversible(a, b, k_val)
+            print(a.__dict__)
+            print(b.__dict__)
+            k_entry.insert(0, pr.k)
+        elif p == 'b':
+            pr = TherodynamicProcess.IsobaricProcess(
+                a, b, comman_pressure=k_val)
+            k_entry.insert(0, pr.comman_pressure)
+        elif p == 'c':
+            pr = TherodynamicProcess.IsochoricProcess(
+                a, b, comman_volume=k_val)
+            k_entry.insert(0, pr.comman_volume)
     elif p == 'A':
         if y != None:
-            pr = TherodynamicProcess.AdiabaticReversible(a, b, y, k)
+            pr = TherodynamicProcess.AdiabaticReversible(a, b, y, k_val)
         else:
-            pr = TherodynamicProcess.AdiabaticReversible(a, b, k=k)
+            pr = TherodynamicProcess.AdiabaticReversible(a, b, k=k_val)
         k_entry.insert(0, pr.k)
         y_entry.insert(0, pr.gamma)
     elif p == 'P':
@@ -178,7 +200,9 @@ for k, x in enumerate([5, 6, 7]):
 options = [
     "Isothermal Reversible Process",
     "Adiabatic Reversible Process",
-    "Polyisotropic Process"
+    "Polyisotropic Process",
+    "Isobaric Process",
+    "Isochoric Process"
 ]
 process = tk.StringVar(r)
 process.trace("w", prcs)
