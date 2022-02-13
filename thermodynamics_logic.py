@@ -385,6 +385,40 @@ class TherodynamicProcess:
                     t.append(state.temperature)
             return {'p': p, 'v': v, 't': t}
 
+    class IsobaricProcess:
+        def __init__(self, a: StateVariable, b: StateVariable, comman_pressure: float = None) -> None:
+            if a.pressure == None:
+                a.pressure = b.pressure
+            if b.pressure == None:
+                b.pressure = a.pressure
+            if (a.pressure == None or b.pressure == None) and comman_pressure != None:
+                TherodynamicProcess.assign(
+                    a, StateVariable(pressure=comman_pressure))
+                TherodynamicProcess.assign(
+                    b, StateVariable(pressure=comman_pressure))
+            if comman_pressure == None:
+                comman_pressure = a.pressure
+            if not(a.pressure == b.pressure == comman_pressure):
+                raise ArithmeticError('Pressure information is not correct')
+            relation = TherodynamicProcess.DefineRulePV()
+            relation.initialize_linear(a, b)
+            self.relation = relation
+            self.comman_pressure = comman_pressure
+            self.a = a
+            self.b = b
+
+        def coordinates(self, a: StateVariable = None, b: StateVariable = None):
+            '''Returns array of `pressure`, `volume` and `temperature` relating to the process between given states'''
+            return self.relation.coordinates(a, b)
+
+        def getStateViaVolume(self, volume: float):
+            '''Returns state for given process for a given volume'''
+            return self.relation.getStateViaVolume(volume)
+
+        def stats(self, a: StateVariable = None, b: StateVariable = None):
+            '''Returns certains quantities related to the process between the given two states'''
+            return self.relation.stats(a, b)
+
     def carnotEnginePlot(a: StateVariable, b: StateVariable, c: StateVariable, d: StateVariable, plot: bool = True, save_name: str = None):
         '''
         Plots the heat enigine's P-V curve
