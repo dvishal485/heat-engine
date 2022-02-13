@@ -3,11 +3,12 @@ from thermodynamics_logic import *
 
 r = tk.Tk()
 dest = []
-globalDest = []
+globalDest: list[tk.Label | tk.Entry | tk.OptionMenu] = []
 r.title('Thermodynamic Process')
 initial = [tk.Entry(r), tk.Entry(r), tk.Entry(r)]
 final = [tk.Entry(r), tk.Entry(r), tk.Entry(r)]
 y_entry, k_entry = (tk.Entry(r), tk.Entry(r))
+k_unit_value = tk.StringVar(r)
 
 
 def clear():
@@ -38,20 +39,34 @@ def prcs(*args):
         asp = process.get()[3]
         if asp == 't':
             k_widget = tk.Label(r, text='k')
+            k_unit = tk.Label(r, text='(in SI)')
+            k_unit.grid(row=12, column=3)
             k_widget.grid(row=12, column=1)
             k_entry.grid(row=12, column=2)
         if asp == 'b':
-            k_widget = tk.Label(r, text='Comman pressure')
+            k_widget = tk.Label(r, text='Comman P')
             k_widget.grid(row=12, column=1)
             k_entry.grid(row=12, column=2)
+            k_unit_value.set(units[0][0])
+            k_unit_selector = tk.OptionMenu(r, k_unit_value, *units[0])
+            k_unit_selector.grid(row=12, column=3)
+            k_unit_selector.config(width=12)
+            dest.append(k_unit_selector)
         if asp == 'c':
-            k_widget = tk.Label(r, text='Comman volume')
+            k_widget = tk.Label(r, text='Comman V')
             k_widget.grid(row=12, column=1)
             k_entry.grid(row=12, column=2)
+            k_unit_value.set(units[1][0])
+            k_unit_selector = tk.OptionMenu(r, k_unit_value, *units[1])
+            k_unit_selector.grid(row=12, column=3)
+            k_unit_selector.config(width=12)
+            dest.append(k_unit_selector)
     elif asp == 'A':
         y = tk.Label(r, text='gamma')
         y.grid(row=11, column=1)
         y_entry.grid(row=11, column=2)
+        k_unit = tk.Label(r, text='(unitless)')
+        k_unit.grid(row=12, column=3)
         k_widget = tk.Label(r, text='k')
         k_widget.grid(row=12, column=1)
         k_entry.grid(row=12, column=2)
@@ -59,11 +74,20 @@ def prcs(*args):
         y = tk.Label(r, text='y')
         y.grid(row=11, column=1)
         y_entry.grid(row=11, column=2)
+        k_unit = tk.Label(r, text='(unitless)')
+        k_unit.grid(row=12, column=3)
         k_widget = tk.Label(r, text='k')
         k_widget.grid(row=12, column=1)
         k_entry.grid(row=12, column=2)
-    dest.append(k_widget)
-    dest.append(k_entry)
+    dest.extend([k_widget, k_entry])
+    try:
+        dest.append(k_unit_selector)
+    except:
+        None
+    try:
+        dest.append(k_unit)
+    except:
+        None
     try:
         dest.append(y)
         dest.append(y_entry)
@@ -105,6 +129,7 @@ def submit():
         float(t) if u2[2].get() == 'Kelvin' else (float(t)-32)*5/9+273.15)
     k_val = k_entry.get()
     k_val = None if k_val == '' else float(k_val)
+    k_unit_num = k_unit_value.get()
     try:
         y = y_entry.get()
         y = None if k == '' else float(y)
@@ -116,18 +141,33 @@ def submit():
     if p == 'I':
         p = process.get()[3]
         if p == 't':
-            pr = TherodynamicProcess.IsothermalReversible(a, b, k_val)
-            print(a.__dict__)
-            print(b.__dict__)
+            pr = TherodynamicProcess.IsothermalReversible(
+                a, b, k_val)
             k_entry.insert(0, pr.k)
         elif p == 'b':
+            if k_unit_num == 'atm':
+                k_unit_num = 101325
+            elif k_unit_num == 'bar':
+                k_unit_num = 10**5
+            elif k_unit_num == 'Pa':
+                k_unit_num = 1
+            elif k_unit_num == 'kPa':
+                k_unit_num = 10**3
+            elif k_unit_num == 'MPa':
+                k_unit_num = 10**6
             pr = TherodynamicProcess.IsobaricProcess(
-                a, b, comman_pressure=k_val)
-            k_entry.insert(0, pr.comman_pressure)
+                a, b, comman_pressure=(k_val * k_unit_num) if k_val != None else None)
+            k_entry.insert(0, pr.comman_pressure/k_unit_num)
         elif p == 'c':
+            if k_unit_num == 'cubic meter':
+                k_unit_num = 1
+            elif k_unit_num == 'L':
+                k_unit_num = 10**-3
+            elif k_unit_num == 'cc' or k_unit_num == 'mL':
+                k_unit_num = 10**-6
             pr = TherodynamicProcess.IsochoricProcess(
-                a, b, comman_volume=k_val)
-            k_entry.insert(0, pr.comman_volume)
+                a, b, comman_volume=(k_val * k_unit_num) if k_val != None else None)
+            k_entry.insert(0, pr.comman_volume/k_unit_num)
     elif p == 'A':
         if y != None:
             pr = TherodynamicProcess.AdiabaticReversible(a, b, y, k_val)
@@ -165,6 +205,7 @@ def submit():
     hrd = tk.Label(r, text=f'{stats["q"]/1000:.3f} kJ')
     hrd.grid(row=17, column=2, padx=5, pady=5)
     globalDest.extend([rs, wd, hr, ie, ier, hrd, wdr])
+    TherodynamicProcess.plot(pr.coordinates())
 
 
 p_units = ['Pa', 'kPa', 'MPa', 'atm', 'bar']
