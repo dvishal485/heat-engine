@@ -79,6 +79,12 @@ def prcs(*args):
         k_widget = tk.Label(r, text='k')
         k_widget.grid(row=12, column=1)
         k_entry.grid(row=12, column=2)
+    elif asp == 'L':
+        k_widget = tk.Label(r, text='Equation')
+        k_widget.grid(row=12, column=1)
+        k_entry.grid(row=12, column=2)
+        k_unit = tk.Label(r, text='(output only)')
+        k_unit.grid(row=12, column=3)
     dest.extend([k_widget, k_entry])
     try:
         dest.append(k_unit_selector)
@@ -128,7 +134,10 @@ def submit():
     t = None if t == '' else (float(t)+273.15) if u2[2].get() == 'Celcius' else (
         float(t) if u2[2].get() == 'Kelvin' else (float(t)-32)*5/9+273.15)
     k_val = k_entry.get()
-    k_val = None if k_val == '' else float(k_val)
+    try:
+        k_val = None if k_val == '' else float(k_val)
+    except:
+        k_val = ''
     k_unit_num = k_unit_value.get()
     try:
         y = y_entry.get()
@@ -179,6 +188,10 @@ def submit():
         pr = TherodynamicProcess.PolyIsotropicProcess(a, b)
         k_entry.insert(0, pr.k)
         y_entry.insert(0, pr.y)
+    elif p == 'L':
+        pr = TherodynamicProcess.DefineRulePV()
+        pr.initialize_linear(a, b)
+        k_entry.insert(0, pr.equation)
     initial[0].insert(0, str(a.pressure/alpUnit[0]))
     initial[1].insert(0, str(a.volume/alpUnit[1]))
     t = a.temperature
@@ -243,7 +256,8 @@ options = [
     "Adiabatic Reversible Process",
     "Polyisotropic Process",
     "Isobaric Process",
-    "Isochoric Process"
+    "Isochoric Process",
+    "Linear Process"
 ]
 process = tk.StringVar(r)
 process.trace("w", prcs)
