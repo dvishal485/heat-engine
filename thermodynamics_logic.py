@@ -331,8 +331,9 @@ class TherodynamicProcess:
                         self.error_message = False
                 else:
                     m = (b.pressure-a.pressure)/(b.volume-a.volume)
-                p = a.pressure + m*(v-a.volume)
-                self.equation = f'P = {m} (V) + {-m*a.volume+a.pressure}'
+                c = a.pressure - m*a.volume
+                p = m*v + c
+                self.equation = f'P = {m} (V) {f"+ {c}" if c>=0 else f"- {-c}"}'
                 return p
             custom_process(a.volume)  # to setup the equation in variable
             self.relation = custom_process
