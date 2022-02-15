@@ -1,8 +1,12 @@
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 import tkinter as tk
 from thermodynamics_logic import *
+import matplotlib
+matplotlib.use("TkAgg")
 
 r = tk.Tk()
 dest = []
+destroy = []
 globalDest: list[tk.Label | tk.Entry | tk.OptionMenu] = []
 r.title('Thermodynamic Process')
 initial = [tk.Entry(r), tk.Entry(r), tk.Entry(r)]
@@ -17,6 +21,10 @@ def clear():
             i.grid_remove()
         except:
             None
+    for i in destroy:
+        i.destroy()
+    
+    destroy.clear()
     initial[0].delete(0, tk.END)
     initial[1].delete(0, tk.END)
     initial[2].delete(0, tk.END)
@@ -28,6 +36,9 @@ def clear():
 
 
 def prcs(*args):
+    for i in destroy:
+        i.destroy()
+    destroy.clear()
     for i in dest:
         try:
             i.grid_remove()
@@ -218,7 +229,17 @@ def submit():
     hrd = tk.Label(r, text=f'{stats["q"]/1000:.3f} kJ')
     hrd.grid(row=17, column=2, padx=5, pady=5)
     globalDest.extend([rs, wd, hr, ie, ier, hrd, wdr])
-    TherodynamicProcess.plot(pr.coordinates())
+    f = TherodynamicProcess.plot(pr.coordinates())
+    f.set_size_inches(7, 4)
+    canvas = FigureCanvasTkAgg(f, r)
+    canvas.draw()
+    toolbar = NavigationToolbar2Tk(canvas, r, pack_toolbar=False)
+    toolbar.grid(row=0, column=5, padx=5)
+    toolbar.update()
+    canvas_widget = canvas.get_tk_widget()
+    canvas_widget.grid(row=1, column=5, rowspan=16, padx=5)
+    destroy.append(toolbar)
+    globalDest.append(canvas_widget)
 
 
 p_units = ['Pa', 'kPa', 'MPa', 'atm', 'bar']
