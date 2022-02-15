@@ -319,6 +319,7 @@ class TherodynamicProcess:
             '''
             self.relation = relation
             self.error_message = True
+            self.equation: str = "Equation can only be determined if rule is defined using method initialize_linear"
 
         def initialize_linear(self, a: StateVariable, b: StateVariable):
             def custom_process(v: float):
@@ -331,7 +332,9 @@ class TherodynamicProcess:
                 else:
                     m = (b.pressure-a.pressure)/(b.volume-a.volume)
                 p = a.pressure + m*(v-a.volume)
+                self.equation = f'P = {m} (V) + {-m*a.volume+a.pressure}'
                 return p
+            custom_process(a.volume)  # to setup the equation in variable
             self.relation = custom_process
             self.a = a
             self.b = b
