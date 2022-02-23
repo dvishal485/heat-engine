@@ -144,7 +144,7 @@ class TherodynamicProcess:
                     t.append(state.temperature)
             return {'p': p, 'v': v, 't': t}
 
-    def changeInInternalEnergy(a: StateVariable, b: StateVariable, Cv =Cv) -> float:
+    def changeInInternalEnergy(a: StateVariable, b: StateVariable, Cv=Cv) -> float:
         '''Returns change in internal energy in process `a` to `b`'''
         return n * Cv * (b.temperature - a.temperature)
 
@@ -215,9 +215,10 @@ class TherodynamicProcess:
             '''Returns state for adiabatic process for a given pressure'''
             return StateVariable(pressure=pressure, volume=(self.k/pressure)**(1/self.gamma))
 
-        def stats(self):
+        def stats(self, adiabatic=True):
             '''Returns certains quantities related to the process'''
-            u = TherodynamicProcess.changeInInternalEnergy(self.a, self.b,R/(self.gamma-1))
+            u = TherodynamicProcess.changeInInternalEnergy(
+                self.a, self.b, R/(self.gamma-1) if adiabatic else Cv)
             try:
                 if self.a.temperature != None and self.b.temperature != None:
                     w = n * R * (self.b.temperature -
@@ -267,7 +268,7 @@ class TherodynamicProcess:
             Parameters
             - `a` : Initial `StateVariable`
             - `b` : Final `StateVariable`
-            - `y` : Value of power of Volume in the expression `PV^x = constant`
+            - `y` : Value of power of Volume in the expression `PV^y = constant`
             - `k` : The value of `constant` in the expression
             '''
             if y == None:
@@ -290,7 +291,7 @@ class TherodynamicProcess:
 
         def stats(self):
             '''Returns certains quantities related to the process'''
-            return self.process.stats()
+            return self.process.stats(adiabatic=False)
 
         def coordinates(self):
             '''Returns array of `pressure`, `volume` and `temperature` relating to the process'''
