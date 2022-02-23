@@ -23,7 +23,7 @@ def clear():
             None
     for i in destroy:
         i.destroy()
-    
+
     destroy.clear()
     initial[0].delete(0, tk.END)
     initial[1].delete(0, tk.END)
@@ -196,7 +196,7 @@ def submit():
         k_entry.insert(0, pr.k)
         y_entry.insert(0, pr.gamma)
     elif p == 'P':
-        pr = TherodynamicProcess.PolytropicProcess(a, b)
+        pr = TherodynamicProcess.PolytropicProcess(a, b, y)
         k_entry.insert(0, pr.k)
         y_entry.insert(0, pr.y)
     elif p == 'L':
