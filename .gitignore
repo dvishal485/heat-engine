@@ -1,3 +1,7 @@
+# Presentations
+*.pptx
+*.ppsx
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
