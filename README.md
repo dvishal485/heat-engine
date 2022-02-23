@@ -23,10 +23,10 @@ Think and create heat engine and visualise it's PV Curve and efficiency using yo
 - Install [all required dependencies](requirements.txt)
 - If you are interested in only processes, launch the [`gui.py`](gui.py) for a simple GUI usage
 - For other usage, study the script using [jupyter notebook provided](heat_engine.ipynb) using platform/IDE of your choice. [Google Colab](https://research.google.com/colaboratory/) is also a feasible option
-- Import the [`themodynamic_logic.py`](themodynamic_logic.py) script in you working folder
+- Import the [`thermodynamics_logic.py`](thermodynamics_logic.py) script in you working folder
 - Import the functions and classes
     ```python
-    from themodynamic_logic import *
+    from thermodynamics_logic import *
     ```
 - Think and show your creativity!
 
