@@ -196,7 +196,7 @@ def submit():
         k_entry.insert(0, pr.k)
         y_entry.insert(0, pr.gamma)
     elif p == 'P':
-        pr = TherodynamicProcess.PolyIsotropicProcess(a, b)
+        pr = TherodynamicProcess.PolytropicProcess(a, b)
         k_entry.insert(0, pr.k)
         y_entry.insert(0, pr.y)
     elif p == 'L':
@@ -275,7 +275,7 @@ for k, x in enumerate([5, 6, 7]):
 options = [
     "Isothermal Reversible Process",
     "Adiabatic Reversible Process",
-    "Polyisotropic Process",
+    "Polytropic Process",
     "Isobaric Process",
     "Isochoric Process",
     "Linear Process"
