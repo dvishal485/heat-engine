@@ -145,7 +145,7 @@ class TherodynamicProcess:
                     t.append(state.temperature)
             return {'p': p, 'v': v, 't': t}
 
-    def changeInInternalEnergy(a: StateVariable, b: StateVariable) -> float:
+    def changeInInternalEnergy(a: StateVariable, b: StateVariable, Cv =Cv) -> float:
         '''Returns change in internal energy in process `a` to `b`'''
         return n * Cv * (b.temperature - a.temperature)
 
@@ -218,7 +218,7 @@ class TherodynamicProcess:
 
         def stats(self):
             '''Returns certains quantities related to the process'''
-            u = TherodynamicProcess.changeInInternalEnergy(self.a, self.b)
+            u = TherodynamicProcess.changeInInternalEnergy(self.a, self.b,R/(self.gamma-1))
             try:
                 if self.a.temperature != None and self.b.temperature != None:
                     w = n * R * (self.b.temperature -
