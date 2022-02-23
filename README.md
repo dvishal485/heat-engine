@@ -1,5 +1,5 @@
 # heat-engine
-Think and create heat enigne and visualise it's PV Curve and efficiency using your own PV relationships and predefined relations!
+Think and create heat engine and visualise it's PV Curve and efficiency using your own PV relationships and predefined relations!
 
 ---
 # Purpose
@@ -21,7 +21,8 @@ Think and create heat enigne and visualise it's PV Curve and efficiency using yo
 **Note** : This is an initial implementation of the project with basic features, functions, processes and heat-engine. I will be looking forward to work further fixing it's errors and interpret results more visually and efficiently.
 
 - Install [all required dependencies](requirements.txt)
-- Study usage of the script from the [jupyter notebook provided](heat_engine.ipynb) using [Google Colab](https://research.google.com/colaboratory/) is recommened
+- If you are interested in only processes, launch the [`gui.py`](gui.py) for a simple GUI usage
+- For other usage, study the script using [jupyter notebook provided](heat_engine.ipynb) using platform/IDE of your choice. [Google Colab](https://research.google.com/colaboratory/) is also a feasible option
 - Import the [`themodynamic_logic.py`](themodynamic_logic.py) script in you working folder
 - Import the functions and classes
     ```python
