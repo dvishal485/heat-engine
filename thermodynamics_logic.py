@@ -1,4 +1,3 @@
-from matplotlib.figure import Figure
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import quad as integrate
@@ -260,7 +259,7 @@ class TherodynamicProcess:
                     t.append(state.temperature)
             return {'p': p, 'v': v, 't': t}
 
-    class PolyIsotropicProcess:
+    class PolytropicProcess:
         def __init__(self, a: StateVariable, b: StateVariable, y: float = None, k: float = None):
             '''
             Process satisfying `PV^y = constant`
@@ -282,11 +281,11 @@ class TherodynamicProcess:
             self.y = y
 
         def getStateViaVolume(self, volume: float) -> StateVariable:
-            '''Returns state for polyisotropic process for a given volume'''
+            '''Returns state for polytropic process for a given volume'''
             return self.process.getStateViaVolume(volume)
 
         def getStateViaPressure(self, pressure: float) -> StateVariable:
-            '''Returns state for polyisotropic process for a given pressure'''
+            '''Returns state for polytropic process for a given pressure'''
             return self.process.getStateViaPressure(pressure)
 
         def stats(self):
