@@ -1,1 +1,0 @@
-conda activate ./env && cls && jupyter notebook && exit
