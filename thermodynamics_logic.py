@@ -215,7 +215,7 @@ class TherodynamicProcess:
             '''Returns state for adiabatic process for a given pressure'''
             return StateVariable(pressure=pressure, volume=(self.k/pressure)**(1/self.gamma))
 
-        def stats(self, adiabatic=True):
+        def stats(self, adiabatic=True) -> dict:
             '''Returns certains quantities related to the process'''
             u = TherodynamicProcess.changeInInternalEnergy(
                 self.a, self.b, R/(self.gamma-1) if adiabatic else Cv)
@@ -532,9 +532,10 @@ class TherodynamicProcess:
             plt.style.use('seaborn')
             fig, ax = plt.subplots(figsize=(13, 5), ncols=2)
         for process in isothermalProcesses:
-            work.append(process.stats()['w'])
-            energy.append(process.stats()['u'])
-            heat.append(process.stats()['q'])
+            stats = process.stats()
+            work.append(stats['w'])
+            energy.append(stats['u'])
+            heat.append(stats['q'])
             pvt = process.coordinates()
             p1 = pvt['p']
             t1 = pvt['t']
@@ -544,9 +545,10 @@ class TherodynamicProcess:
                 ax[1].plot(t1, v1, label="Isothermal Process")
 
         for process in adiabaticProcesses:
-            work.append(process.stats()['w'])
-            energy.append(process.stats()['u'])
-            heat.append(process.stats()['q'])
+            stats = process.stats()
+            work.append(stats['w'])
+            energy.append(stats['u'])
+            heat.append(stats['q'])
             pvt = process.coordinates()
             p2 = pvt['p']
             t2 = pvt['t']
@@ -658,13 +660,13 @@ class TherodynamicProcess:
         heat = []
         for n, i in enumerate(processes):
             try:
+                s = i().stats()
+            except:
                 if(n+1 == len(processes)):
                     f = 0
                 else:
                     f = n+1
                 s = i().stats(state_variables[n], state_variables[f])
-            except:
-                s = i().stats()
             work.append(s['w'])
             energy.append(s['u'])
             heat.append(s['q'])
