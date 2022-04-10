@@ -9,7 +9,9 @@ Think and create heat engine and visualise it's PV Curve and efficiency using yo
     Predefined processes include :
     - Isothermal Process
     - Adiabatic Process
-    - Isotropic Process
+    - Isotopic Process
+    - Isobaric Process
+    - Isochoric Process
 1. Study the heat transfer, work done and change in internal energy of these processes and heat engine
 1. Study Heat Enigine and Carnot Engine
 1. Build a simple carnot engine with given restrictions and study it's efficiency
@@ -35,4 +37,4 @@ Think and create heat engine and visualise it's PV Curve and efficiency using yo
 # License & Copyright
 
   - This Project is [Apache-2.0](./LICENSE) Licensed
-  - Copyright 2021 [Vishal Das](https://github.com/dvishal485)
+  - Copyright 2022 [Vishal Das](https://github.com/dvishal485)
