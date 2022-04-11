@@ -9,7 +9,7 @@ Think and create heat engine and visualise it's PV Curve and efficiency using yo
     Predefined processes include :
     - Isothermal Process
     - Adiabatic Process
-    - Isotopic Process
+    - Polytropic Process
     - Isobaric Process
     - Isochoric Process
 1. Study the heat transfer, work done and change in internal energy of these processes and heat engine
